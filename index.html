@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>D3 Project</title>
+    <meta charset="utf-8">
+    <script src="library/d3.v3.min.js"></script>
+    <style type="text/css">
+        h1{
+            font-family :Arial;
+        }
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: black;
+            shape-rendering: crispEdges;
+        }
+
+        .axis text {
+            font-family: Arial;
+            font-size: 11px;
+        }
+
+        .labels {
+            fill:white;
+        }
+
+        button {
+             margin-right:10px;
+             margin-top: 20px;
+             margin-bottom: 20px;
+             font-family: Arial;
+             font-size: 16px;
+        }
+        .chart_description{
+             width: 1000px;
+        }
+    </style>
+    <script type="text/javascript">
+        // Describes the chart with given label
+        function description(label) {
+            if (label === "players"){
+                return "The above chart displays number of players for different batting stance in the original data set comprising 1157 baseball players. Clearly, right-handed batsman are more common in the game of baseball.";
+            } else if(label === "HR"){
+                return "Grouping the 1157 baseball players according to the way they hold their bats and then finding out the mean number of home runs for each group, left-handed batsman hit more home runs on average.";
+            } else{
+                return "Similarly, grouping the 1157 baseball players in the data set according to the way they hold their bats and then calculating the mean of average score of the players show batsman that could hold bats both way have the highest mean average score.";
+            }
+        }
+
+        function baseball_facts(data){
+            "use strict";
+            var margin = 15,
+                width = 1000 - margin,
+                height = 450 - margin;
+
+            var bar_height = 80;
+
+
+            // Adding title
+            d3.select("body")
+              .append("h1")
+              .text("Explore facts about batting handedness for baseball players");
+
+            // Adding buttons panel above the chart
+            d3.select("body")
+              .append("div")
+              .attr("class","buttons_panel");
+
+            // Setting up the chart
+            var chart = d3.select("body")
+                .append("svg")
+                .attr("width", width + margin)
+                .attr("height", height + margin)
+                .append('g')
+                .attr('class', 'chart_1')
+                .attr("transform","translate(" + margin + "," + margin  + ")");
+
+            // Adding the desciption paragraph
+            d3.select("body")
+              .append("p")
+              .attr("class","chart_description");
+
+            // Display the bar chart corresponding to the information required by the user
+            function information(label){
+                // Removing the data elements, axis and text labels from the chart
+                d3.select("body")
+                   .selectAll("rect")
+                   .remove();
+
+                d3.select("body")
+                   .selectAll(".labels")
+                   .remove();
+
+                d3.select("body")
+                   .selectAll(".axis")
+                   .remove();
+
+                d3.select("body")
+                   .selectAll(".axis_label")
+                   .remove();
+
+                d3.select("body")
+                   .selectAll(".chart_desription")
+                   .remove();
+
+
+                // Scale
+                var x = d3.scale.linear()
+                              .range([0,width - 20])
+                              .domain([0,d3.max(data,function(d){return d[label];})]);
+
+                // Adding data binded rectangles
+                chart.selectAll("rect")
+                    .data(data.sort( function(a, b) {return (b[label] - a[label]);}))
+                    .enter()
+                    .append("rect")
+                    .attr("width",0)
+                    .attr("fill","#777")
+                    .transition()
+                    .duration(2000)
+                    .attr("y", function(d, i) { return i * (bar_height + 10); })
+                    .attr("width", function(d){return x(d[label]);})
+                    .style('fill', function(d,i){
+                        if (i == 0){
+                            return "#D23641";
+                        }
+                        else{
+                            return "#6E6568";
+                        }
+                    })
+                    .attr("height", bar_height);
+                // Adding text to each rectangle instead of y-axis
+                chart.selectAll("text")
+                    .data(data.sort(function(a, b) {return (b[label] - a[label]);}))
+                    .enter()
+                    .append("text")
+                    .attr("class","labels")
+                    .attr("x", 30)
+                    .attr("y", function(d, i) { return (i * (bar_height + 10)) + bar_height/2; })
+                    .attr("dy", ".35em") // vertical-align: middle
+                    .attr("text-anchor", "end") // text-align: right
+                    .text(function(d) { return d.handedness;});
+
+                // Adding x-axis
+                var xAxis = d3.svg.axis()
+                                  .scale(x)
+                                  .orient('bottom')
+                                  .ticks(15);
+                // Adding x-axis
+                chart.append('g')
+                     .attr("class", "axis")
+                     .attr("transform", "translate(0," + (height * .62) + ")")
+                     .transition()
+                     .duration(500)
+                     .call(xAxis);
+
+                // Adding x label
+                chart.append("text")
+                  .text(label)
+                  .attr("class","axis_label")
+                  .attr("x", width/2)
+                  .attr("y", height * .70)
+                  .style("font-family","Arial")
+                  .style("font-size","16px")
+                  .style("font-weight", "normal");
+
+                // Adding chart desrciption
+                d3.select(".chart_description")
+                     .text(description(label))
+                     .style("font-family","Arial")
+                     .style("font-size","18px");
+
+
+            }
+
+            // Add buttons to the button panel and appropriately bind them to respective bar charts
+            function interactiveButtons(){
+                var labels = ["Player Counts","Average HR","Average avg"];
+                var buttons = d3.select(".buttons_panel")
+                       .selectAll("button")
+                       .data(labels)
+                       .enter()
+                       .append("button")
+                       .text(function(d){return d;});
+
+                    buttons.on("click", function(d) {
+                        buttons.style("background", "white");
+
+                        d3.select(this)
+                          .transition()
+                          .duration(250)
+                          .style("background", "lightBlue")
+
+                        if (d === "Player Counts"){
+                            information("players");
+                        } else if (d === "Average HR"){
+                            information("HR");
+                        } else{
+                            information("avg");
+                        }
+                    });
+
+            }
+            // Showing initial information
+            information("players");
+            // then making the interactive buttons that are reactive to the user inputs
+            interactiveButtons();
+
+        }
+
+    </script>
+</head>
+<body>
+
+<script type="text/javascript">
+        /*Reading the data*/
+        d3.csv("data/baseball_handedness.csv",function(d){
+            d["HR"] = +d["HR"];
+            d["avg"] = +d["avg"];
+            d["players"] = +d["players"];
+            return d;
+        },
+        baseball_facts);
+    </script>
+
+
+</body>
+</html>

@@ -276,7 +276,7 @@
 
         var y = d3.scale.linear()
                   .range([height, 0]);
-
+        // diverging set of colors selected from colorBrewer website
         var color = d3.scale.linear()
                       .range(["#4575b4","#ffffbf","#d73027"]);
 
@@ -365,7 +365,7 @@
                         .text("")
                         .transition()
                         .duration(1000)
-                        .text( d.name +" is "+ d.handedness + " handed")
+                        .text( d.name +":"+ d.handedness + ", " + label + " = " + d[label])
                         .attr("x", x(d.weight) + 10)
                         .attr("y", y(d.height)) + 10;
                     })
@@ -376,8 +376,8 @@
                 .style("fill","white")
                 .style("stroke","white")
                 .attr("r", 7)
-                .attr("cx", function(d) { return x(d.weight); })
-                .attr("cy", function(d) { return y(d.height); })
+                .attr("cx", function(d) { return x(d.weight) + 2 * Math.random() - 1; })
+                .attr("cy", function(d) { return y(d.height) + 2 * Math.random() - 1; })
                 .transition()
                 .duration(1000)
                 .style("fill", function(d) { return color(d[label]); })

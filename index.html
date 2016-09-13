@@ -1,482 +1,522 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>D3 Project</title>
-    <meta charset="utf-8">
-    <script src="library/d3.v3.min.js"></script>
-    <style type="text/css">
 
-      body {
-        font: 10px sans-serif;
-      }
-      .name{
-        font: 14px sans-serif;
-      }
-
-      .axis path,
-      .axis line {
-        fill: none;
-        stroke: #000;
-        shape-rendering: crispEdges;
-      }
-
-      button {
-             margin-right:10px;
-             margin-top: 20px;
-             margin-bottom: 20px;
-             font-family: sans-serif;
-             font-size: 16px;
-        }
-
-      .chart_description_1{
-             word-wrap: break-word;
-             font-family :sans-serif;
-             font-size:18px;
-        }
-
-
-        h1{
-            padding: 20px;
-            font-family :sans-serif;
-            font-size:30px;
-            text-align: center;
-        }
-
-        h2{
-            font-family :sans-serif;
-            font-size:22px;
-        }
-
-        .axis_chart_1 path,
-        .axis_chart_1 line {
-            fill: none;
-            stroke: black;
-            shape-rendering: crispEdges;
-        }
-
-        .axis_chart_1 axis text {
-            font-family: sans-serif;
-            font-size: 11px;
-        }
-
-        .labels {
-            fill:white;
-        }
-
-        .chart_description{
-             word-wrap: break-word;
-        }
-
-
-    </style>
-    <script type="text/javascript">
-        // Describes the chart with given label
-        function description(label) {
-            if (label === "players"){
-                return "Counting number of players of different handedness among 1157 baseball players, right-handed batsman are more common in the game.";
-            } else if(label === "HR"){
-                return "Grouping the 1157 baseball players according to handedness and finding out mean number of home runs for each group, left-handed batsman clearly hit more home runs on average.";
-            } else{
-                return "Similarly, grouping baseball players according to their handedness and calculating mean average score of the players in each group shows batsman that could hold bats both way have the highest average score.";
-            }
-        }
-        // Making interactive bar chart showing summary about player handedness in the baseball game
-        function baseball_facts(data){
-            "use strict";
-            var margin = 15,
-                width = 1000 - margin,
-                height = 450 - margin;
-
-            var bar_height = 80;
-
-
-            // Adding Graphic title
-            d3.select("body")
-              .append("h1")
-              .text("Interesting Findings In The Baseball Data Set");
-
-
-            // Adding chart title
-            d3.select("body")
-              .append("h2")
-              .text("Explore facts about batting handedness for baseball players");
-
-            // Adding buttons panel above the chart
-            d3.select("body")
-              .append("div")
-              .attr("class","buttons_panel");
-
-            // Setting up the chart
-            var chart = d3.select("body")
-                .append("svg")
-                .attr("width", width + margin)
-                .attr("height", height + margin)
-                .append('g')
-                .attr('class', 'chart_1')
-                .attr("transform","translate(" + margin + "," + margin  + ")");
-
-            // Adding the desciption paragraph
-            d3.select("body")
-              .append("p")
-              .attr("class","chart_description");
-
-            // Adding horizontal row
-            d3.select("body")
-              .append("hr")
-              .attr("width","800");
-
-
-
-            // Display the bar chart corresponding to the information required by the user
-            function information(label){
-                // Removing the data elements, axis and text labels from the chart
-                d3.select("body")
-                   .selectAll(".bar")
-                   .remove();
-
-                d3.select("body")
-                   .selectAll(".labels")
-                   .remove();
-
-                d3.select("body")
-                   .selectAll(".axis_chart_1")
-                   .remove();
-
-                d3.select("body")
-                   .selectAll(".axis_label")
-                   .remove();
-
-                d3.select("body")
-                   .selectAll(".chart_desription")
-                   .remove();
-
-
-                // Scale
-                var x = d3.scale.linear()
-                              .range([0,width - 20])
-                              .domain([0,d3.max(data,function(d){return d[label];})]);
-
-                // Adding data binded rectangles
-                chart.selectAll("rect")
-                    .data(data.sort( function(a, b) {return (b[label] - a[label]);}))
-                    .enter()
-                    .append("rect")
-                    .attr("class","bar")
-                    .attr("width",0)
-                    .attr("fill","#777")
-                    .transition()
-                    .duration(2000)
-                    .attr("y", function(d, i) { return i * (bar_height + 10); })
-                    .attr("width", function(d){return x(d[label]);})
-                    .style('fill', function(d,i){
-                        if (i == 0){
-                            return "#D23641";
-                        }
-                        else{
-                            return "#6E6568";
-                        }
-                    })
-                    .attr("height", bar_height);
-                // Adding text to each rectangle instead of y-axis
-                chart.selectAll("text")
-                    .data(data.sort(function(a, b) {return (b[label] - a[label]);}))
-                    .enter()
-                    .append("text")
-                    .attr("class","labels")
-                    .attr("x", 30)
-                    .attr("y", function(d, i) { return (i * (bar_height + 10)) + bar_height/2; })
-                    .attr("dy", ".35em") // vertical-align: middle
-                    .attr("text-anchor", "end") // text-align: right
-                    .text(function(d) { return d.handedness;});
-
-                // Adding x-axis
-                var xAxis = d3.svg.axis()
-                                  .scale(x)
-                                  .orient('bottom')
-                                  .ticks(15);
-                // Adding x-axis
-                chart.append('g')
-                     .attr("class", "axis_chart_1")
-                     .attr("transform", "translate(0," + (height * .62) + ")")
-                     .transition()
-                     .duration(500)
-                     .call(xAxis);
-
-                // Adding x label
-                chart.append("text")
-                  .text(label)
-                  .attr("class","axis_label")
-                  .attr("x", width/2)
-                  .attr("y", height * .70)
-                  .style("font-family","sans-serif")
-                  .style("font-size","16px")
-                  .style("font-weight", "normal");
-
-                // Adding chart desrciption
-                d3.select(".chart_description")
-                     .text(description(label))
-                     .style("font-family","sans-serif")
-                     .style("font-size","18px");
-
-
-
-
+    <head>
+        <title>D3 Project</title>
+        <meta charset="utf-8">
+        <script src="library/d3.v3.min.js"></script>
+        <style type="text/css">
+            body {
+                font: 10px sans-serif;
             }
 
-            // Add buttons to the button panel and appropriately bind them to respective bar charts
-            function interactiveButtons(){
-                var labels = ["Player Counts","Average HR","Average avg"];
-                var buttons = d3.select(".buttons_panel")
-                       .selectAll("button")
-                       .data(labels)
-                       .enter()
-                       .append("button")
-                       .text(function(d){return d;});
+            .name {
+                font: 14px sans-serif;
+            }
+
+            .axis path,
+            .axis line {
+                fill: none;
+                stroke: #000;
+                shape-rendering: crispEdges;
+            }
+
+            button {
+                margin-right: 10px;
+                margin-top: 20px;
+                margin-bottom: 20px;
+                font-family: sans-serif;
+                font-size: 16px;
+            }
+
+            .chart_description_1 {
+                word-wrap: break-word;
+                font-family: sans-serif;
+                font-size: 18px;
+            }
+
+            h1 {
+                padding: 20px;
+                font-family: sans-serif;
+                font-size: 30px;
+                text-align: center;
+            }
+
+            h2 {
+                font-family: sans-serif;
+                font-size: 22px;
+            }
+
+            .axis_chart_1 path,
+            .axis_chart_1 line {
+                fill: none;
+                stroke: black;
+                shape-rendering: crispEdges;
+            }
+
+            .axis_chart_1 axis text {
+                font-family: sans-serif;
+                font-size: 11px;
+            }
+
+            .labels {
+                fill: white;
+            }
+
+            .chart_description {
+                word-wrap: break-word;
+            }
+        </style>
+        <script type="text/javascript">
+            // Describes the chart with given label
+            function description(label) {
+                if (label === "players") {
+                    return "Counting number of players of different handedness among 1157 baseball players, right-handed batsman are more common in the game.";
+                } else if (label === "HR") {
+                    return "Grouping the 1157 baseball players according to handedness and finding out mean number of home runs for each group, left-handed batsman clearly hit more home runs on average.";
+                } else {
+                    return "Similarly, grouping baseball players according to their handedness and calculating mean average score of the players in each group shows batsman that could hold bats both way have the highest average score.";
+                }
+            }
+            // Making interactive bar chart showing summary about player handedness in the baseball game
+            function baseball_facts(data) {
+                "use strict";
+                var margin = 15,
+                    width = 1000 - margin,
+                    height = 450 - margin;
+
+                var bar_height = 80;
+
+
+                // Adding Graphic title
+                d3.select("body")
+                    .append("h1")
+                    .text("Interesting Findings In The Baseball Data Set");
+
+
+                // Adding chart title
+                d3.select("body")
+                    .append("h2")
+                    .text("Explore facts about batting handedness for baseball players");
+
+                // Adding buttons panel above the chart
+                d3.select("body")
+                    .append("div")
+                    .attr("class", "buttons_panel");
+
+                // Setting up the chart
+                var chart = d3.select("body")
+                    .append("svg")
+                    .attr("width", width + margin)
+                    .attr("height", height + margin)
+                    .append('g')
+                    .attr('class', 'chart_1')
+                    .attr("transform", "translate(" + margin + "," + margin + ")");
+
+                // Adding the desciption paragraph
+                d3.select("body")
+                    .append("p")
+                    .attr("class", "chart_description");
+
+                // Adding horizontal row
+                d3.select("body")
+                    .append("hr")
+                    .attr("width", "800");
+
+
+
+                // Display the bar chart corresponding to the information required by the user
+                function information(label) {
+                    // Removing the data elements, axis and text labels from the chart
+                    d3.select("body")
+                        .selectAll(".bar")
+                        .remove();
+
+                    d3.select("body")
+                        .selectAll(".labels")
+                        .remove();
+
+                    d3.select("body")
+                        .selectAll(".axis_chart_1")
+                        .remove();
+
+                    d3.select("body")
+                        .selectAll(".axis_label")
+                        .remove();
+
+                    d3.select("body")
+                        .selectAll(".chart_desription")
+                        .remove();
+
+
+                    // Scale
+                    var x = d3.scale.linear()
+                        .range([0, width - 20])
+                        .domain([0, d3.max(data, function(d) {
+                            return d[label];
+                        })]);
+
+                    // Adding data binded rectangles
+                    chart.selectAll("rect")
+                        .data(data.sort(function(a, b) {
+                            return (b[label] - a[label]);
+                        }))
+                        .enter()
+                        .append("rect")
+                        .attr("class", "bar")
+                        .attr("width", 0)
+                        .attr("fill", "#777")
+                        .transition()
+                        .duration(2000)
+                        .attr("y", function(d, i) {
+                            return i * (bar_height + 10);
+                        })
+                        .attr("width", function(d) {
+                            return x(d[label]);
+                        })
+                        .style('fill', function(d, i) {
+                            if (i == 0) {
+                                return "#D23641";
+                            } else {
+                                return "#6E6568";
+                            }
+                        })
+                        .attr("height", bar_height);
+                    // Adding text to each rectangle instead of y-axis
+                    chart.selectAll("text")
+                        .data(data.sort(function(a, b) {
+                            return (b[label] - a[label]);
+                        }))
+                        .enter()
+                        .append("text")
+                        .attr("class", "labels")
+                        .attr("x", 30)
+                        .attr("y", function(d, i) {
+                            return (i * (bar_height + 10)) + bar_height / 2;
+                        })
+                        .attr("dy", ".35em") // vertical-align: middle
+                        .attr("text-anchor", "end") // text-align: right
+                        .text(function(d) {
+                            return d.handedness;
+                        });
+
+                    // Adding x-axis
+                    var xAxis = d3.svg.axis()
+                        .scale(x)
+                        .orient('bottom')
+                        .ticks(15);
+                    // Adding x-axis
+                    chart.append('g')
+                        .attr("class", "axis_chart_1")
+                        .attr("transform", "translate(0," + (height * .62) + ")")
+                        .transition()
+                        .duration(500)
+                        .call(xAxis);
+
+                    // Adding x label
+                    chart.append("text")
+                        .text(label)
+                        .attr("class", "axis_label")
+                        .attr("x", width / 2)
+                        .attr("y", height * .70)
+                        .style("font-family", "sans-serif")
+                        .style("font-size", "16px")
+                        .style("font-weight", "normal");
+
+                    // Adding chart desrciption
+                    d3.select(".chart_description")
+                        .text(description(label))
+                        .style("font-family", "sans-serif")
+                        .style("font-size", "18px");
+
+
+
+
+                }
+
+                // Add buttons to the button panel and appropriately bind them to respective bar charts
+                function interactiveButtons() {
+                    var labels = ["Player Counts", "Average HR", "Average avg"];
+                    var buttons = d3.select(".buttons_panel")
+                        .selectAll("button")
+                        .data(labels)
+                        .enter()
+                        .append("button")
+                        .text(function(d) {
+                            return d;
+                        });
 
                     buttons.on("click", function(d) {
                         buttons.style("background", "white");
 
                         d3.select(this)
-                          .transition()
-                          .duration(250)
-                          .style("background", "lightBlue")
+                            .transition()
+                            .duration(250)
+                            .style("background", "lightBlue")
 
-                        if (d === "Player Counts"){
+                        if (d === "Player Counts") {
                             information("players");
-                        } else if (d === "Average HR"){
+                        } else if (d === "Average HR") {
                             information("HR");
-                        } else{
+                        } else {
                             information("avg");
                         }
                     });
 
+                }
+                // Showing initial information
+                information("players");
+                // then making the interactive buttons that are reactive to the user inputs
+                interactiveButtons();
+
             }
-            // Showing initial information
-            information("players");
-            // then making the interactive buttons that are reactive to the user inputs
-            interactiveButtons();
 
-        }
+            // Draw interactive bubble chart whith color encoding HR/avg for each player
+            function drawBubbleChart(data) {
 
-      // Draw interactive bubble chart whith color encoding HR/avg for each player
-      function drawBubbleChart(data){
-
-        // Adding title
-        d3.select("body")
-          .append("h2")
-          .text("Explore best/worst players in terms of home runs they have scored and their batting average");
+                // Adding title
+                d3.select("body")
+                    .append("h2")
+                    .text("Explore best/worst players in terms of home runs they have scored and their batting average");
 
 
-        var margin = {top: 20, right: 40, bottom: 30, left: 40},
-            width = 960 - margin.left - margin.right,
-            height = 500 - margin.top - margin.bottom;
+                var margin = {
+                        top: 20,
+                        right: 40,
+                        bottom: 30,
+                        left: 40
+                    },
+                    width = 960 - margin.left - margin.right,
+                    height = 500 - margin.top - margin.bottom;
 
-        var x = d3.scale.linear()
-                  .range([0, width]);
+                var x = d3.scale.linear()
+                    .range([0, width]);
 
-        var y = d3.scale.linear()
-                  .range([height, 0]);
-        // diverging set of colors selected from colorBrewer website
-        var color = d3.scale.linear()
-                      .range(["#4575b4","#ffffbf","#d73027"]);
+                var y = d3.scale.linear()
+                    .range([height, 0]);
+                // diverging set of colors selected from colorBrewer website
+                var color = d3.scale.linear()
+                    .range(["#4575b4", "#ffffbf", "#d73027"]);
 
-        var xAxis = d3.svg.axis()
-            .scale(x)
-            .orient("bottom");
+                var xAxis = d3.svg.axis()
+                    .scale(x)
+                    .orient("bottom");
 
-        var yAxis = d3.svg.axis()
-            .scale(y)
-            .orient("left");
+                var yAxis = d3.svg.axis()
+                    .scale(y)
+                    .orient("left");
 
-        var svg = d3.select("body").append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
-          .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+                var svg = d3.select("body").append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                    .append("g")
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-        // setting up the x,y scales
-        x.domain(d3.extent(data, function(d) { return d.weight; })).nice();
-        y.domain(d3.extent(data, function(d) { return d.height; })).nice();
+                // setting up the x,y scales
+                x.domain(d3.extent(data, function(d) {
+                    return d.weight;
+                })).nice();
+                y.domain(d3.extent(data, function(d) {
+                    return d.height;
+                })).nice();
 
-        svg.append("g")
-            .attr("class", "x axis")
-            .attr("transform", "translate(0," + height + ")")
-            .call(xAxis)
-            .append("text")
-              .attr("class", "label")
-              .attr("x", width)
-              .attr("y", -6)
-              .style("text-anchor", "end")
-              .text("weight(pounds)")
-              .style("font-family","sans-serif")
-              .style("font-size","16px")
-              .style("font-weight", "normal");
+                svg.append("g")
+                    .attr("class", "x axis")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(xAxis)
+                    .append("text")
+                    .attr("class", "label")
+                    .attr("x", width)
+                    .attr("y", -6)
+                    .style("text-anchor", "end")
+                    .text("weight(pounds)")
+                    .style("font-family", "sans-serif")
+                    .style("font-size", "16px")
+                    .style("font-weight", "normal");
 
-        svg.append("g")
-              .attr("class", "y axis")
-              .call(yAxis)
-            .append("text")
-              .attr("class", "label")
-              .attr("transform", "rotate(-90)")
-              .attr("y", 6)
-              .attr("dy", ".71em")
-              .style("text-anchor", "end")
-              .text("height(inches)")
-              .style("font-family","sans-serif")
-              .style("font-size","16px")
-              .style("font-weight", "normal");
+                svg.append("g")
+                    .attr("class", "y axis")
+                    .call(yAxis)
+                    .append("text")
+                    .attr("class", "label")
+                    .attr("transform", "rotate(-90)")
+                    .attr("y", 6)
+                    .attr("dy", ".71em")
+                    .style("text-anchor", "end")
+                    .text("height(inches)")
+                    .style("font-family", "sans-serif")
+                    .style("font-size", "16px")
+                    .style("font-weight", "normal");
 
-        // Adding button panel
-        d3.select("body").append("div").attr("class","buttons_panel_1");
+                // Adding button panel
+                d3.select("body").append("div").attr("class", "buttons_panel_1");
 
-        // Adding the desciption paragraph
-        d3.select("body")
-              .append("p")
-              .attr("class","chart_description_1");
+                // Adding the desciption paragraph
+                d3.select("body")
+                    .append("p")
+                    .attr("class", "chart_description_1");
 
-        // Adding horizontal row
-         d3.select("body")
-           .append("hr")
-           .attr("width","800");
+                // Adding horizontal row
+                d3.select("body")
+                    .append("hr")
+                    .attr("width", "800");
 
-        // Adding horizontal row
-         d3.select("body")
-           .append("hr")
-           .attr("width","800");
+                // Adding horizontal row
+                d3.select("body")
+                    .append("hr")
+                    .attr("width", "800");
 
-        // Plotting chart showing bubbles with color encoding HR/avg player score on the diverging scale around the median value
-        function information(label){
-          // removing old points and legends
-          d3.selectAll(".dot").remove();
-          d3.selectAll(".legend").remove();
+                // Plotting chart showing bubbles with color encoding HR/avg player score on the diverging scale around the median value
+                function information(label) {
+                    // removing old points and legends
+                    d3.selectAll(".dot").remove();
+                    d3.selectAll(".legend").remove();
 
-          // setting up diverging color scale
-          color.domain([d3.min(data,function(d){return d[label];}),d3.median(data,function(d){return d[label];}),d3.max(data,function(d){return d[label];})]);
-            // Adding circles with location at weight,height and color proportional to the HR/avg
-            svg.selectAll(".dot")
-                .data(data)
-                .enter().append("circle")
-                .attr("class", "dot")
-                .on("mouseover", function(d) {
-                      d3.select(this)
-                        .attr("r",9);
-                      svg.append("text")
-                        .attr("class","name")
-                        .text("")
+                    // setting up diverging color scale
+                    color.domain([d3.min(data, function(d) {
+                        return d[label];
+                    }), d3.median(data, function(d) {
+                        return d[label];
+                    }), d3.max(data, function(d) {
+                        return d[label];
+                    })]);
+                    // Adding circles with location at weight,height and color proportional to the HR/avg
+                    svg.selectAll(".dot")
+                        .data(data)
+                        .enter().append("circle")
+                        .attr("class", "dot")
+                        .on("mouseover", function(d) {
+                            d3.select(this)
+                                .attr("r", 9);
+                            svg.append("text")
+                                .attr("class", "name")
+                                .text("")
+                                .transition()
+                                .duration(1000)
+                                .text(d.name + ":" + d.handedness + ", " + label + " = " + d[label])
+                                .attr("x", x(d.weight) + 10)
+                                .attr("y", y(d.height)) + 10;
+                        })
+                        .on("mouseout", function() {
+                            d3.select(this).attr("r", 7);
+                            svg.select(".name").remove();
+                        })
+                        .style("fill", "white")
+                        .style("stroke", "white")
+                        .attr("r", 7)
+                        .attr("cx", function(d) {
+                            return x(d.weight) + 2 * Math.random() - 1;
+                        })
+                        .attr("cy", function(d) {
+                            return y(d.height) + 2 * Math.random() - 1;
+                        })
                         .transition()
                         .duration(1000)
-                        .text( d.name +":"+ d.handedness + ", " + label + " = " + d[label])
-                        .attr("x", x(d.weight) + 10)
-                        .attr("y", y(d.height)) + 10;
-                    })
-                .on("mouseout", function(){
-                    d3.select(this).attr("r",7);
-                    svg.select(".name").remove();
-                    })
-                .style("fill","white")
-                .style("stroke","white")
-                .attr("r", 7)
-                .attr("cx", function(d) { return x(d.weight) + 2 * Math.random() - 1; })
-                .attr("cy", function(d) { return y(d.height) + 2 * Math.random() - 1; })
-                .transition()
-                .duration(1000)
-                .style("fill", function(d) { return color(d[label]); })
-                .style("stroke", function(d) { return color(d[label]); });
+                        .style("fill", function(d) {
+                            return color(d[label]);
+                        })
+                        .style("stroke", function(d) {
+                            return color(d[label]);
+                        });
 
-             // Adding legends to the chart to show diverging scale around the median value
-              var legend = svg.selectAll(".legend")
-                  .data(color.ticks(15).reverse())
-                .enter().append("g")
-                  .attr("class", "legend")
-                  .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+                    // Adding legends to the chart to show diverging scale around the median value
+                    var legend = svg.selectAll(".legend")
+                        .data(color.ticks(15).reverse())
+                        .enter().append("g")
+                        .attr("class", "legend")
+                        .attr("transform", function(d, i) {
+                            return "translate(0," + i * 20 + ")";
+                        });
 
-              legend.append("rect")
-                  .attr("x", width - 18)
-                  .attr("width", 18)
-                  .attr("height", 18)
-                  .style("fill", color);
+                    legend.append("rect")
+                        .attr("x", width - 18)
+                        .attr("width", 18)
+                        .attr("height", 18)
+                        .style("fill", color);
 
-              legend.append("text")
-                  .attr("x", width - 24)
-                  .attr("y", 9)
-                  .attr("dy", ".35em")
-                  .style("text-anchor", "end")
-                  .text(function(d) { return d; });
+                    legend.append("text")
+                        .attr("x", width - 24)
+                        .attr("y", 9)
+                        .attr("dy", ".35em")
+                        .style("text-anchor", "end")
+                        .text(function(d) {
+                            return d;
+                        });
 
-              // Setting up the chart description
-              var HR_text = "Red bubbles show players that have hit a lot of home runs like Johnny Bench and Boog Powell. Blue colored are those who have hit 0 or few home runs. Middle color between the red and blue end of the spectrums indicate the median home runs i.e. 50% of the baseball players have hit HR less than and 50% more than it. Using the color hue, one can find best/worst hitters in the data set.";
-              var avg_text = "Red bubbles show players that have really good batting average, darker the color the higher the average. One can easily see players like Bob Watson, Alex Johnson having really good batting averages. On the other extreme, blue colored players are bad ones, having low batting average and here we have players like Jim Dorsey and Ramon Manon.Using the color hue, one can find best/worst players in the data set.";
+                    // Setting up the chart description
+                    var HR_text = "Red bubbles show players that have hit a lot of home runs like Johnny Bench and Boog Powell. Blue colored are those who have hit 0 or few home runs. Middle color between the red and blue end of the spectrums indicate the median home runs i.e. 50% of the baseball players have hit HR less than and 50% more than it. Using the color hue, one can find best/worst hitters in the data set.";
+                    var avg_text = "Red bubbles show players that have really good batting average, darker the color the higher the average. One can easily see players like Bob Watson, Alex Johnson having really good batting averages. On the other extreme, blue colored players are bad ones, having low batting average and here we have players like Jim Dorsey and Ramon Manon.Using the color hue, one can find best/worst players in the data set.";
 
-              if (label === "HR"){
-                    d3.select(".chart_description_1")
-                      .text(HR_text);
-              } else{
-                    d3.select(".chart_description_1")
-                          .text(avg_text);
-              }
-
-            }
-        // Adding and buttons and configuring them to make relevant calls to oberserve HR or average scores
-        function interactiveButtons(){
-                        var labels = ["HR","avg"];
-                        var buttons = d3.select(".buttons_panel_1")
-                               .selectAll("button")
-                               .data(labels)
-                               .enter()
-                               .append("button")
-                               .text(function(d){
-                                  if (d === "HR"){
-                                    return "Homes Run Hit";
-                                  } else {
-                                    return "Player Average";
-                                  }
-                                });
-
-                            buttons.on("click", function(d) {
-                                buttons.style("background", "white");
-                                d3.select(this)
-                                  .transition()
-                                  .duration(250)
-                                  .style("background", "lightBlue")
-
-                                if (d === "HR"){
-                                    information("HR");
-                                } else{
-                                    information("avg");
-                                }
-                            });
+                    if (label === "HR") {
+                        d3.select(".chart_description_1")
+                            .text(HR_text);
+                    } else {
+                        d3.select(".chart_description_1")
+                            .text(avg_text);
                     }
 
-          information("HR");
-          interactiveButtons();
+                }
+                // Adding and buttons and configuring them to make relevant calls to oberserve HR or average scores
+                function interactiveButtons() {
+                    var labels = ["HR", "avg"];
+                    var buttons = d3.select(".buttons_panel_1")
+                        .selectAll("button")
+                        .data(labels)
+                        .enter()
+                        .append("button")
+                        .text(function(d) {
+                            if (d === "HR") {
+                                return "Homes Run Hit";
+                            } else {
+                                return "Player Average";
+                            }
+                        });
+
+                    buttons.on("click", function(d) {
+                        buttons.style("background", "white");
+                        d3.select(this)
+                            .transition()
+                            .duration(250)
+                            .style("background", "lightBlue")
+
+                        if (d === "HR") {
+                            information("HR");
+                        } else {
+                            information("avg");
+                        }
+                    });
+                }
+
+                information("HR");
+                interactiveButtons();
 
 
-    }
+            }
+        </script>
+    </head>
 
+    <body>
 
-    </script>
-</head>
-<body>
-
-<script type="text/javascript">
-        /*Reading the data*/
-        d3.csv("data/baseball_handedness.csv",function(d){
-            d["HR"] = +d["HR"];
-            d["avg"] = +d["avg"];
-            d["players"] = +d["players"];
-            return d;
-        },
-        baseball_facts);
-
-        d3.csv("data/baseball_data.csv", function(d){
-              d["weight"] = +d["weight"];
-              d["height"] = +d["height"];
-              d["HR"] = +d["HR"];
-              d["avg"] = +d["avg"];
-              return d;
+        <script type="text/javascript">
+            //Reading the summary data and plotting interactive bar chart
+            d3.csv("data/baseball_handedness.csv", function(d) {
+                    d["HR"] = +d["HR"];
+                    d["avg"] = +d["avg"];
+                    d["players"] = +d["players"];
+                    return d;
+                },
+                baseball_facts);
+            // Reading in the complete baseball data set and drawing interactive scatterplot
+            d3.csv("data/baseball_data.csv", function(d) {
+                d["weight"] = +d["weight"];
+                d["height"] = +d["height"];
+                d["HR"] = +d["HR"];
+                d["avg"] = +d["avg"];
+                return d;
             }, drawBubbleChart);
-    </script>
+        </script>
 
 
-</body>
+    </body>
+
 </html>

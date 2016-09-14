@@ -71,11 +71,11 @@
             // Describes the chart with given label
             function description(label) {
                 if (label === "players") {
-                    return "Counting players of different handedness among 1157 baseball players, right-handed batsmen are most common in the game.";
+                    return "Counting number of players of different handedness among 1157 baseball players, right-handed batsman are more common in the game.";
                 } else if (label === "HR") {
-                    return "Grouping the 1157 baseball players according to handedness and finding out mean number of home runs for each group, left-handed batsmen clearly hit more home runs on average.";
+                    return "Grouping the 1157 baseball players according to handedness and finding out mean number of home runs for each group, left-handed batsman clearly hit more home runs on average.";
                 } else {
-                    return "Likewise, grouping players according to their handedness and calculating mean average score for each group, ambidextrous batters have the highest average score.";
+                    return "Similarly, grouping baseball players according to their handedness and calculating mean average score of the players in each group shows batsman that could hold bats both way have the highest average score.";
                 }
             }
             // Making interactive bar chart showing summary about player handedness in the baseball game
@@ -97,7 +97,7 @@
                 // Adding chart title
                 d3.select("body")
                     .append("h2")
-                    .text("Right-handed batsmen dominate baseball, however, left-handed and ambidextrous batters perform better.");
+                    .text("Explore facts about batting handedness for baseball players");
 
                 // Adding buttons panel above the chart
                 d3.select("body")
@@ -507,7 +507,6 @@
                 },
                 baseball_facts);
             // Reading in the complete baseball data set and drawing interactive scatterplot
-            /* Focusing on just one finding related to the summary about the handedness
             d3.csv("data/baseball_data.csv", function(d) {
                 d["weight"] = +d["weight"];
                 d["height"] = +d["height"];
@@ -515,7 +514,6 @@
                 d["avg"] = +d["avg"];
                 return d;
             }, drawBubbleChart);
-           */
         </script>
 
 

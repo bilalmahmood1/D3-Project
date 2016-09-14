@@ -61,6 +61,8 @@
 
             .labels {
                 fill: white;
+                font-family: sans-serif;
+                font-size: 18px;
             }
 
             .chart_description {
@@ -97,7 +99,7 @@
                 // Adding chart title
                 d3.select("body")
                     .append("h2")
-                    .text("Right-handed batsmen dominate baseball, however, left-handed and ambidextrous batters perform better.");
+                    .text("Right-handed batsmen are in greater numbers in baseball, however, left-handed and ambidextrous batters perform better.");
 
                 // Adding buttons panel above the chart
                 d3.select("body")
@@ -195,9 +197,15 @@
                             return (i * (bar_height + 10)) + bar_height / 2;
                         })
                         .attr("dy", ".35em") // vertical-align: middle
-                        .attr("text-anchor", "end") // text-align: right
+                        .attr("text-anchor", "left") // text-align: right
                         .text(function(d) {
-                            return d.handedness;
+                              if (d.handedness === "L"){
+                                return "Left";
+                            } else if (d.handedness === "R"){
+                                return "Right";
+                            } else {
+                                return "Both";
+                            };
                         });
 
                     // Adding x-axis

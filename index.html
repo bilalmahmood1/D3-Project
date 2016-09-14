@@ -206,7 +206,17 @@
                             } else {
                                 return "Both";
                             };
-                        });
+                        })
+                        .style("font-size","18px")
+                        .transition()
+                        .duration(1000)
+                        .style("font-size",function(d,i){
+                            if(i === 0){
+                                return "30px";
+                            }})
+                        .transition()
+                        .duration(1000)
+                        .style("font-size","18px");
 
                     // Adding x-axis
                     var xAxis = d3.svg.axis()

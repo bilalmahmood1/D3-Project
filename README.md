@@ -1,6 +1,12 @@
 ## Data Visualization
 #### [Interesting Findings In The Baseball Data Set](https://bilalmahmood1.github.io/D3-Project/)
 
+
+<p align="center">
+  <img src="demo_image.png" width="800"/>
+</p>
+
+
 ### Summary
 Right-handed batsmen are most common in the game, but left-handed batsmen hit on average more home runs and ambidextrous batters have the best batting average.
 
